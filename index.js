@@ -4,6 +4,7 @@ const vaultEndpoint = "https://vault.omise.co/";
 const apiEndpoint = "https://api.omise.co/";
 
 let _key;
+let _sKey;
 let _apiVersion;
 class ReactNativeOmise {
     constructor() {
@@ -13,10 +14,12 @@ class ReactNativeOmise {
         this.retrieveCustomer = this.retrieveCustomer.bind(this);
         this.updateCustomer = this.updateCustomer.bind(this);
         this.destroyCustomerCard = this.destroyCustomerCard.bind(this);
+        this.createCharge = this.createCharge.bind(this);
     }
 
-    config(key, apiVersion = "2015-11-17") {
-        _key = key
+    config(key, sKey, apiVersion = "2015-11-17") {
+        _key = key;
+        _sKey = sKey;
         _apiVersion = apiVersion;
     }
 
@@ -151,6 +154,25 @@ class ReactNativeOmise {
             }).catch((error) => resolve(error));
         })
     }
+    createCharge(data) {
+        const chargeEndpoint = `${apiEndpoint}charges`;
+        const headers = this.getHeaders(_sKey);
+        return new Promise((resolve, reject) => {
+            return fetch(chargeEndpoint, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: headers,
+                body: JSON.stringify(data)
+            }).then((response) => {
+                if (response.ok && response.status === 200) {
+                    resolve(response.json());
+                } else {
+                    console.log("response not ok", response);
+                    reject(response.json());
+                }
+            }).catch((error) => resolve(error));
+        });
+    }
 }
 
 
@@ -163,5 +185,6 @@ module.exports = {
     createCustomer: reactNativeOmise.createCustomer,
     retrieveCustomer: reactNativeOmise.retrieveCustomer,
     updateCustomer: reactNativeOmise.updateCustomer,
-    destroyCustomerCard: reactNativeOmise.destroyCustomerCard
+    destroyCustomerCard: reactNativeOmise.destroyCustomerCard,
+    createCharge: reactNativeOmise.createCharge,
 }
